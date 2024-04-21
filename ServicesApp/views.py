@@ -123,50 +123,49 @@ def predict(request):
         selected_model = MLOPS.objects.get(model_name=model_name)
         # Query the MLOPS model to get the entry that matches the given model name.
 
-        if selected_model.model_category == 'Regression':
-            # Check if the model category is 'Regression'.
+    if selected_model.model_category == 'Regression':
 
-            regressor = Regression()
-            # Create an instance of the Regression class.
+    # Create an instance of the Regression class
+        regressor = Regression()
+        
+        # Initialize the regressor with inputs, output, and the selected model
+        regressor.initialize(inputs, output, selected_model.model)
+        
+        # Execute the regression to get the prediction
+        prediction = regressor.execute()
+        
+        # Return the prediction as a JSON response
+        return JsonResponse({'predictions': prediction})
 
-            regressor.initialize(inputs, output, selected_model.model)
-            # Initialize the regressor with inputs, output, and the model details.
+    elif selected_model.model_category == 'RandomForest':
+        # Check if the model category is 'RandomForest'.
 
-            prediction = regressor.execute()
-            # Execute the regression model to get the prediction.
+        rf = RandomForest()
+        # Create an instance of the RandomForest class.
 
-            return JsonResponse({'predictions': prediction})
-            # Return the predictions as a JSON response.
+        rf.initialize(inputs, output, selected_model.model)
+        # Initialize the random forest with inputs, output, and the model details.
 
-        elif selected_model.model_category == 'RandomForest':
-            # Check if the model category is 'RandomForest'.
+        prediction = rf.execute()
+        # Execute the random forest model to get the prediction.
 
-            rf = RandomForest()
-            # Create an instance of the RandomForest class.
+        return JsonResponse({'Prediction': prediction})
+        # Return the predictions as a JSON response.
 
-            rf.initialize(inputs, output, selected_model.model)
-            # Initialize the random forest with inputs, output, and the model details.
+    elif selected_model.model_category == 'DecisionTree':
+        # Check if the model category is 'DecisionTree'.
 
-            prediction = rf.execute()
-            # Execute the random forest model to get the prediction.
+        dectree = DecisionTree()
+        # Create an instance of the DecisionTree class.
 
-            return JsonResponse({'Prediction': prediction})
-            # Return the predictions as a JSON response.
+        dectree.initialize(inputs, output, selected_model.model)
+        # Initialize the decision tree with inputs, output, and the model details.
 
-        elif selected_model.model_category == 'DecisionTree':
-            # Check if the model category is 'DecisionTree'.
+        prediction = dectree.execute()
+        # Execute the decision tree model to get the prediction.
 
-            dectree = DecisionTree()
-            # Create an instance of the DecisionTree class.
-
-            dectree.initialize(inputs, output, selected_model.model)
-            # Initialize the decision tree with inputs, output, and the model details.
-
-            prediction = dectree.execute()
-            # Execute the decision tree model to get the prediction.
-
-            return JsonResponse({'Prediction': prediction})
-            # Return the predictions as a JSON response.
+        return JsonResponse({'Prediction': prediction})
+        # Return the predictions as a JSON response.
             
 @api_view(['GET'])
 # This decorator specifies that this view function only accepts GET requests.
