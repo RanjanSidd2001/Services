@@ -1,0 +1,7 @@
+# Admin credential for accessing web services
+username: admin@netcarbonvision.com
+password: admin@321
+
+# URLs
+token_url: http://sustainos.ai:9000/ncarp_lens_app/api/login_user/
+data_url: http://sustainos.ai:9000/dataservice_app/api/parameter_values/

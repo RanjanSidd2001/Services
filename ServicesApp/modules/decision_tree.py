@@ -23,24 +23,19 @@ class DecisionTree:
 
     @staticmethod
     def predict_with_tree(tree, features):
-        # Static method to predict the output using the decision tree.
-        # It traverses the tree recursively until a leaf node is reached.
-        def recurse(node):
-            # If the node is a leaf, return its value.
+        def recurse(node, feature_values):
             if 'value' in node:
                 return node['value']
             else:
-                # Otherwise, get the feature name and threshold from the node.
-                feature_name = node['name']
+                feature_index = node['feature_names'].index(node['name'])
                 threshold = node['threshold']
-                # Recurse on the left or right child based on the feature's value.
-                if features[feature_name] <= threshold:
-                    return recurse(node['left'])
+                if feature_values[feature_index] <= threshold:
+                    return recurse(node['left'], feature_values)
                 else:
-                    return recurse(node['right'])
-        # Start the recursion from the root of the tree.
-        return recurse(tree)
+                    return recurse(node['right'], feature_values)
         
+        
+        return recurse(tree, features)
     def __str__(self) -> str:
         # String representation of the DecisionTree class.
         return "DecisionTree Class"

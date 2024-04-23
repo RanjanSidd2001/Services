@@ -8,6 +8,8 @@ from rest_framework import status
 from ServicesApp.modules.regression import Regression
 from ServicesApp.modules.decision_tree import DecisionTree
 from ServicesApp.modules.random_forest import RandomForest
+from ServicesApp.modules.authenticate import AuthenticationService
+from ServicesApp.modules.Writer import Writer
 
 @csrf_exempt # This decorator exempts the view from CSRF verification.
 @api_view(['POST'])
@@ -53,7 +55,7 @@ def save_model(request):
 @api_view(['GET'])
 def view_model_details(request):
     # This view handles the GET request for viewing a specific ML model's details.
-    if request.method == 'GET':
+    if request.method == 'GET':  # Check if the request method is GET.
         try:
             # Attempt to retrieve the model by its name from the query parameters.
             model_name = request.GET.get('model_name')
@@ -78,7 +80,7 @@ def view_model_details(request):
             # If any other exception occurs, print the error and return a 500 error in JSON format.
             print(f"An error occurred: {str(e)}")
             return JsonResponse({'error': 'An error occurred while processing the request'}, status=500)
-
+        
 @api_view(['GET'])        
 def view_model_list(request):
     # This view returns a list of all ML model names stored in the database.
@@ -104,24 +106,27 @@ def view_model_list(request):
 @csrf_exempt # This decorator exempts the view from CSRF verification.        
 def predict(request):
     # This function defines a view that handles predictions based on the model category.
-
+    # authenticator = AuthenticationService()
+    # writer = Writer(authenticator.token)
+    # reader = Reader(authenticator.token)
     if request.method == 'POST':  # Check if the request method is POST.
         # The view only processes POST requests, typically used for submitting data.
-
-        data = json.loads(request.body)
+        
         # Parse the JSON data from the request body.
+        data = json.loads(request.body)
 
-        model_name = data.get('model_name')
         # Retrieve the 'model_name' from the parsed data.
-
-        inputs = data.get('inputs')
+        model_name = data.get('model_name')
+        
         # Retrieve the 'inputs' from the parsed data, which are the features for prediction.
+        inputs = data.get('inputs')
 
-        output = data.get('output')
         # Retrieve the 'output' from the parsed data, which is the target variable for prediction.
-
-        selected_model = MLOPS.objects.get(model_name=model_name)
+        output = data.get('output')
+        
         # Query the MLOPS model to get the entry that matches the given model name.
+        selected_model = MLOPS.objects.get(model_name=model_name)
+       
 
     if selected_model.model_category == 'Regression':
 
@@ -133,10 +138,10 @@ def predict(request):
         
         # Execute the regression to get the prediction
         prediction = regressor.execute()
-        
+        # result = writer.write_data(output, prediction)
         # Return the prediction as a JSON response
         return JsonResponse({'predictions': prediction})
-
+    
     elif selected_model.model_category == 'RandomForest':
         # Check if the model category is 'RandomForest'.
 
@@ -164,7 +169,7 @@ def predict(request):
         prediction = dectree.execute()
         # Execute the decision tree model to get the prediction.
 
-        return JsonResponse({'Prediction': prediction})
+        return JsonResponse({'Prediction': prediction[0]})
         # Return the predictions as a JSON response.
             
 @api_view(['GET'])
@@ -175,33 +180,35 @@ def view_model_by_category(request):
     if request.method == 'GET':
         # Check if the incoming request is a GET request.
 
-        try:
-            # Try block to attempt the following operations.
+        try: # Try block to attempt the following operations.
+           
 
-            model_category = request.GET.get('model_category')
             # Retrieve the 'model_category' parameter from the query string of the GET request.
+            model_category = request.GET.get('model_category')
+            
 
-            models = MLOPS.objects.filter(model_category=model_category)
             # Query the MLOPS model to get all entries that match the given category.
+            models = MLOPS.objects.filter(model_category=model_category)
+            
 
-            model_names = [model.model_name for model in models]
             # Create a list of model names from the queried models.
-
-            return Response({'models': model_names})
+            model_names = [model.model_name for model in models]
+  
             # Return a successful HTTP response with the list of model names.
+            return Response({'models': model_names})
+            
 
         except MLOPS.DoesNotExist:
             # If no model is found for the given category, handle the DoesNotExist exception.
-
             return Response({'error': 'Model not found'}, status=status.HTTP_404_NOT_FOUND)
             # Return an HTTP 404 Not Found response with an error message.
+       
+        except Exception as e: # Catch any other exceptions that may occur.
 
-        except Exception as e:
-            # Catch any other exceptions that may occur.
-
-            print(f"An error occurred: {str(e)}")
             # Print the error message to the console or log.
-
-            return Response({'error': 'An error occurred while processing the request'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            print(f"An error occurred: {str(e)}")
+            
             # Return an HTTP 500 Internal Server Error response with an error message.
+            return Response({'error': 'An error occurred while processing the request'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         
