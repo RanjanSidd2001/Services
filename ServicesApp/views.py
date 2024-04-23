@@ -106,29 +106,29 @@ def predict(request):
     # This function defines a view that handles predictions based on the model category.
 
     if request.method == 'POST':  # Check if the request method is POST.
-        # The view only processes POST requests, typically used for submitting data.
-
-        data = json.loads(request.body)
+        
         # Parse the JSON data from the request body.
+        data = json.loads(request.body)
 
-        model_name = data.get('model_name')
         # Retrieve the 'model_name' from the parsed data.
-
-        inputs = data.get('inputs')
+        model_name = data.get('model_name')
+        
         # Retrieve the 'inputs' from the parsed data, which are the features for prediction.
+        inputs = data.get('inputs')
 
-        output = data.get('output')
         # Retrieve the 'output' from the parsed data, which is the target variable for prediction.
-
-        selected_model = MLOPS.objects.get(model_name=model_name)
+        output = data.get('output')
+        
         # Query the MLOPS model to get the entry that matches the given model name.
+        selected_model = MLOPS.objects.get(model_name=model_name)
+        
 
     if selected_model.model_category == 'Regression':
 
-    # Create an instance of the Regression class
+        # Create an instance of the Regression class
         regressor = Regression()
         
-        # Initialize the regressor with inputs, output, and the selected model
+        # Initialize the regressor with inputs, output, and configuration
         regressor.initialize(inputs, output, selected_model.model)
         
         # Execute the regression to get the prediction
@@ -137,35 +137,33 @@ def predict(request):
         # Return the prediction as a JSON response
         return JsonResponse({'predictions': prediction})
 
+    # Check if the model category is 'RandomForest'.
     elif selected_model.model_category == 'RandomForest':
-        # Check if the model category is 'RandomForest'.
 
-        rf = RandomForest()
         # Create an instance of the RandomForest class.
-
-        rf.initialize(inputs, output, selected_model.model)
+        rf = RandomForest()
+        
         # Initialize the random forest with inputs, output, and the model details.
-
-        prediction = rf.execute()
+        rf.initialize(inputs, output, selected_model.model)
+        
         # Execute the random forest model to get the prediction.
-
+        prediction = rf.execute()
+        
         return JsonResponse({'Prediction': prediction})
-        # Return the predictions as a JSON response.
-
+        
+    # Check if the model category is 'DecisionTree'.
     elif selected_model.model_category == 'DecisionTree':
-        # Check if the model category is 'DecisionTree'.
-
-        dectree = DecisionTree()
+        
         # Create an instance of the DecisionTree class.
-
-        dectree.initialize(inputs, output, selected_model.model)
+        dectree = DecisionTree()
+        
         # Initialize the decision tree with inputs, output, and the model details.
-
-        prediction = dectree.execute()
+        dectree.initialize(inputs, output, selected_model.model)
+        
         # Execute the decision tree model to get the prediction.
-
+        prediction = dectree.execute()
+        
         return JsonResponse({'Prediction': prediction})
-        # Return the predictions as a JSON response.
             
 @api_view(['GET'])
 # This decorator specifies that this view function only accepts GET requests.
@@ -177,19 +175,18 @@ def view_model_by_category(request):
 
         try:
             # Try block to attempt the following operations.
-
-            model_category = request.GET.get('model_category')
             # Retrieve the 'model_category' parameter from the query string of the GET request.
-
-            models = MLOPS.objects.filter(model_category=model_category)
+            model_category = request.GET.get('model_category')
+            
             # Query the MLOPS model to get all entries that match the given category.
-
-            model_names = [model.model_name for model in models]
+            models = MLOPS.objects.filter(model_category=model_category)
+            
             # Create a list of model names from the queried models.
-
-            return Response({'models': model_names})
+            model_names = [model.model_name for model in models]
+            
             # Return a successful HTTP response with the list of model names.
-
+            return Response({'models': model_names})
+            
         except MLOPS.DoesNotExist:
             # If no model is found for the given category, handle the DoesNotExist exception.
 
